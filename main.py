@@ -39,21 +39,31 @@ edges = []
 for page, entities in corpus.items():
     print(f"### {page}")
     for target_entity in entities:
-        if target_entity.lower() in [ k.lower() for k in corpus.keys()]:
+        if target_entity.lower() in [ k.lower() for k in corpus.keys()] or True:
             print(page, '->', target_entity)
             edges.append((page.lower(), target_entity.lower()))
 
 
 # %%
 from pyvis.network import Network
-net = Network("1000px", "1000px", directed=True)
+import networkx
+
+nx = networkx.Graph()
+
 
 
 for e in edges:
-    for n in e:
-        if e not in net.nodes:
-            net.add_node(n)
-            
-    net.add_edge(*e)
+    nx.add_edge(*e)
+
+to_remove = [n for n in nx if len(nx[n]) < 4]
+nx.remove_nodes_from(to_remove)
+for n in nx:
+    nx.nodes[n]['mass'] = len(nx[n]) * 5
+    nx.nodes[n]['size'] = len(nx[n]) * 5
+
+net = Network("1000px", "1000px")
+net.from_nx(nx)
 net.show('nx.html')
+
+
 # %%
